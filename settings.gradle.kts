@@ -6,7 +6,7 @@ pluginManagement {
     }
 }
 
-rootProject.name = "blogkmp"
+rootProject.name = "BlogMultiplatform"
 
 include(":site")
 
