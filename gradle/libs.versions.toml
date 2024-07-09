@@ -3,7 +3,7 @@ jetbrains-compose = "1.6.2"
 kobweb = "0.18.0"
 kotlin = "1.9.23"
 kmongo = "5.1.0"
-serialization = "1.5.1"
+serialization = "1.6.2"
 mongodb = "1.13.0"
 mongodb-kotlin = "4.11.0"
 
@@ -29,3 +29,4 @@ kobweb-worker = { id = "com.varabyte.kobweb.worker", version.ref = "kobweb" }
 kobwebx-markdown = { id = "com.varabyte.kobwebx.markdown", version.ref = "kobweb" }
 kotlin-multiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
 kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
+mongodb-realm = { id = "io.realm.kotlin", version.ref = "mongodb" }

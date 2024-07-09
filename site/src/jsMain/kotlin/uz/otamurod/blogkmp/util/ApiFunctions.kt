@@ -7,16 +7,23 @@ import kotlinx.serialization.json.Json
 import uz.otamurod.blogkmp.models.User
 import uz.otamurod.blogkmp.models.UserWithoutPassword
 
-suspend fun checkUserExistance(user: User): UserWithoutPassword? {
-    return try {
-        val result = window.api.tryPost(
-            apiPath = "usercheck",
-            body = Json.encodeToString(user).encodeToByteArray()
-        )
+private val json = Json {
+    ignoreUnknownKeys = true
+}
 
-        Json.decodeFromString<UserWithoutPassword>(result.toString())
+suspend fun checkUserExistence(user: User): UserWithoutPassword? {
+    return try {
+        window.api.tryPost(
+            apiPath = "usercheck",
+            body = json.encodeToString(user).encodeToByteArray()
+        )?.decodeToString().parseData()
     } catch (e: Exception) {
+        println("CURRENT_USER")
         println(e.message)
         null
     }
+}
+
+inline fun <reified T> String?.parseData(): T {
+    return Json.decodeFromString(this.toString())
 }

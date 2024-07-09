@@ -26,8 +26,9 @@ class MongoDB(val context: InitApiContext) : MongoRepository {
     private val database = client.getDatabase(DATABASE_NAME)
     private val userCollection = database.getCollection<User>("user")
 
-    override suspend fun checkUserExistance(user: User): User? {
+    override suspend fun checkUserExistence(user: User): User? {
         return try {
+            println("Filtering user")
             userCollection
                 .find(
                     Filters.and(
@@ -36,6 +37,7 @@ class MongoDB(val context: InitApiContext) : MongoRepository {
                     )
                 ).firstOrNull()
         } catch (e: Exception) {
+            println("Error while filtering user")
             context.logger.error(e.message.toString())
             null
         }

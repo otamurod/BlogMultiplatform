@@ -56,7 +56,7 @@ import uz.otamurod.blogkmp.styles.LoginInputStyle
 import uz.otamurod.blogkmp.util.Constants.FONT_FAMILY
 import uz.otamurod.blogkmp.util.Id
 import uz.otamurod.blogkmp.util.Res
-import uz.otamurod.blogkmp.util.checkUserExistance
+import uz.otamurod.blogkmp.util.checkUserExistence
 
 @Page
 @Composable
@@ -152,7 +152,7 @@ fun LoginScreen() {
                                 (document.getElementById(Id.passwordInput) as HTMLInputElement).value
 
                             if (username.isNotEmpty() && password.isNotEmpty()) {
-                                val user = checkUserExistance(
+                                val user = checkUserExistence(
                                     user = User(
                                         username = username,
                                         password = password
@@ -162,7 +162,7 @@ fun LoginScreen() {
                                 if (user != null) {
                                     rememberLoggedIn(remember = true, user = user)
 
-                                    pageContext.router.navigateTo("/admin/home")
+                                    pageContext.router.navigateTo("/admin")
                                 } else {
                                     errorMessage = "User not found"
                                     delay(3000)
@@ -203,7 +203,7 @@ private fun rememberLoggedIn(
 ) {
     localStorage["remember"] = remember.toString()
     if (user != null) {
-        localStorage["userId"] = user.id
+        localStorage["userId"] = user._id
         localStorage["username"] = user.username
     }
 }

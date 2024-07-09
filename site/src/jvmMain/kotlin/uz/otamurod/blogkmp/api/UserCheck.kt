@@ -15,29 +15,25 @@ import java.security.MessageDigest
 @Api(routeOverride = "usercheck")
 suspend fun userCheck(context: ApiContext) {
     try {
-        val userRequest = context.req.body?.decodeToString()?.let {
-            Json.decodeFromString<User>(it)
-        }
+        val userRequest =
+            context.req.body?.decodeToString()?.let { Json.decodeFromString<User>(it) }
         val user = userRequest?.let {
             context.data.getValue<MongoDB>()
-                .checkUserExistance(
-                    user = User(username = it.username, password = hashPassword(it.password))
+                .checkUserExistence(
+                    User(username = it.username, password = hashPassword(it.password))
                 )
         }
         if (user != null) {
             context.res.setBodyText(
-                Json.encodeToString<UserWithoutPassword>(
-                    UserWithoutPassword(
-                        id = user.id,
-                        username = user.username
-                    )
+                Json.encodeToString(
+                    UserWithoutPassword(_id = user._id, username = user.username)
                 )
             )
         } else {
-            context.res.setBodyText(Json.encodeToString(Exception("User not found")))
+            context.res.setBodyText(Json.encodeToString("User doesn't exist."))
         }
     } catch (e: Exception) {
-        context.res.setBodyText(Json.encodeToString(Exception(e.message)))
+        context.res.setBodyText(Json.encodeToString(e.message))
     }
 }
 
