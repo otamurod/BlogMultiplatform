@@ -31,11 +31,13 @@ import org.jetbrains.compose.web.css.Position
 import org.jetbrains.compose.web.css.px
 import org.jetbrains.compose.web.css.vh
 import uz.otamurod.blogkmp.models.Theme
+import uz.otamurod.blogkmp.navigation.Screen
 import uz.otamurod.blogkmp.styles.NavigationItemStyle
 import uz.otamurod.blogkmp.util.Constants.FONT_FAMILY
 import uz.otamurod.blogkmp.util.Constants.SIDE_PANEL_WIDTH
 import uz.otamurod.blogkmp.util.Id
 import uz.otamurod.blogkmp.util.Res
+import uz.otamurod.blogkmp.util.logout
 
 @Composable
 fun SidePanel() {
@@ -72,29 +74,36 @@ fun NavigationItems() {
     NavigationItem(
         modifier = Modifier.margin(bottom = 24.px),
         title = "Home",
-        selected = true,
+        selected = context.route.path == Screen.AdminHome.route,
         icon = Res.PathIcon.home,
         onClick = {
+            context.router.navigateTo(Screen.AdminHome.route)
         }
     )
     NavigationItem(
         modifier = Modifier.margin(bottom = 24.px),
         title = "Create Post",
+        selected = context.route.path == Screen.AdminCreate.route,
         icon = Res.PathIcon.create,
         onClick = {
+            context.router.navigateTo(Screen.AdminCreate.route)
         }
     )
     NavigationItem(
         modifier = Modifier.margin(bottom = 24.px),
         title = "My Posts",
+        selected = context.route.path == Screen.AdminMyPosts.route,
         icon = Res.PathIcon.posts,
         onClick = {
+            context.router.navigateTo(Screen.AdminMyPosts.route)
         }
     )
     NavigationItem(
         title = "Logout",
         icon = Res.PathIcon.logout,
         onClick = {
+            logout()
+            context.router.navigateTo(Screen.AdminLogin.route)
         }
     )
 }
