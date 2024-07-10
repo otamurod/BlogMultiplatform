@@ -46,6 +46,7 @@ import org.jetbrains.compose.web.css.percent
 import org.jetbrains.compose.web.css.px
 import org.jetbrains.compose.web.css.vh
 import uz.otamurod.blogkmp.components.AdminPageLayout
+import uz.otamurod.blogkmp.components.LoadingIndicator
 import uz.otamurod.blogkmp.models.RandomJoke
 import uz.otamurod.blogkmp.models.Theme
 import uz.otamurod.blogkmp.navigation.Screen
@@ -53,6 +54,7 @@ import uz.otamurod.blogkmp.util.Constants.FONT_FAMILY
 import uz.otamurod.blogkmp.util.Constants.PAGE_WIDTH
 import uz.otamurod.blogkmp.util.Constants.SIDE_PANEL_WIDTH
 import uz.otamurod.blogkmp.util.Res
+import uz.otamurod.blogkmp.util.fetchRandomJoke
 import uz.otamurod.blogkmp.util.isUserLoggedIn
 
 @Page
@@ -66,10 +68,11 @@ fun HomeScreen() {
     var randomJoke: RandomJoke? by remember { mutableStateOf(null) }
 
     LaunchedEffect(Unit) {
-        randomJoke = RandomJoke(
+        fetchRandomJoke { randomJoke = it }
+        /*randomJoke = RandomJoke(
             id = 2,
-            joke = "Q:Why did the blog writer become a detective?:To uncover the hidden truths and captivating stories behind clickbait titles!"
-        )
+            joke = "Q:Why did the blog writer become a detective?\n A:To uncover the hidden truths and captivating stories behind clickbait titles!"
+        )*/
     }
 
     AdminPageLayout {
@@ -141,7 +144,7 @@ fun HomeContent(randomJoke: RandomJoke?) {
                 }
             }
         } else {
-            println("Loading content...")
+            LoadingIndicator()
         }
     }
 }
