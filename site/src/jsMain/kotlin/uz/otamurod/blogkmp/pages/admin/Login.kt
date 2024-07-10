@@ -52,6 +52,7 @@ import org.w3c.dom.set
 import uz.otamurod.blogkmp.models.Theme
 import uz.otamurod.blogkmp.models.User
 import uz.otamurod.blogkmp.models.UserWithoutPassword
+import uz.otamurod.blogkmp.navigation.Screen
 import uz.otamurod.blogkmp.styles.LoginInputStyle
 import uz.otamurod.blogkmp.util.Constants.FONT_FAMILY
 import uz.otamurod.blogkmp.util.Id
@@ -162,7 +163,7 @@ fun LoginScreen() {
                                 if (user != null) {
                                     rememberLoggedIn(remember = true, user = user)
 
-                                    pageContext.router.navigateTo("/admin")
+                                    pageContext.router.navigateTo(Screen.AdminHome.route)
                                 } else {
                                     errorMessage = "User not found"
                                     delay(3000)
