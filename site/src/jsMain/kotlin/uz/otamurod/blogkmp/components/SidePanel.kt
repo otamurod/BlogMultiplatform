@@ -8,9 +8,11 @@ import com.varabyte.kobweb.compose.foundation.layout.Column
 import com.varabyte.kobweb.compose.foundation.layout.Row
 import com.varabyte.kobweb.compose.ui.Alignment
 import com.varabyte.kobweb.compose.ui.Modifier
+import com.varabyte.kobweb.compose.ui.graphics.Colors
 import com.varabyte.kobweb.compose.ui.modifiers.backgroundColor
 import com.varabyte.kobweb.compose.ui.modifiers.color
 import com.varabyte.kobweb.compose.ui.modifiers.cursor
+import com.varabyte.kobweb.compose.ui.modifiers.fillMaxWidth
 import com.varabyte.kobweb.compose.ui.modifiers.fontFamily
 import com.varabyte.kobweb.compose.ui.modifiers.fontSize
 import com.varabyte.kobweb.compose.ui.modifiers.height
@@ -25,14 +27,19 @@ import com.varabyte.kobweb.compose.ui.thenIf
 import com.varabyte.kobweb.compose.ui.toAttrs
 import com.varabyte.kobweb.core.rememberPageContext
 import com.varabyte.kobweb.silk.components.graphics.Image
+import com.varabyte.kobweb.silk.components.icons.fa.FaBars
+import com.varabyte.kobweb.silk.components.icons.fa.IconSize
 import com.varabyte.kobweb.silk.components.style.toModifier
 import com.varabyte.kobweb.silk.components.text.SpanText
+import com.varabyte.kobweb.silk.style.breakpoint.Breakpoint
+import com.varabyte.kobweb.silk.theme.breakpoint.rememberBreakpoint
 import org.jetbrains.compose.web.css.Position
 import org.jetbrains.compose.web.css.px
 import org.jetbrains.compose.web.css.vh
 import uz.otamurod.blogkmp.models.Theme
 import uz.otamurod.blogkmp.navigation.Screen
 import uz.otamurod.blogkmp.styles.NavigationItemStyle
+import uz.otamurod.blogkmp.util.Constants.COLLAPSED_PANEL_HEIGHT
 import uz.otamurod.blogkmp.util.Constants.FONT_FAMILY
 import uz.otamurod.blogkmp.util.Constants.SIDE_PANEL_WIDTH
 import uz.otamurod.blogkmp.util.Id
@@ -40,7 +47,17 @@ import uz.otamurod.blogkmp.util.Res
 import uz.otamurod.blogkmp.util.logout
 
 @Composable
-fun SidePanel() {
+fun SidePanel(onMenuClick: () -> Unit){
+    val breakpoint = rememberBreakpoint()
+    if (breakpoint > Breakpoint.MD){
+        InternalSidePanel()
+    }else{
+        CollapsedSidePanel(onMenuClick = onMenuClick)
+    }
+}
+
+@Composable
+private fun InternalSidePanel() {
     Column(
         modifier = Modifier
             .padding(leftRight = 40.px, topBottom = 50.px)
@@ -168,5 +185,31 @@ private fun VectorIcon(
             attr(attr = "stroke-linecap", value = "round")
             attr(attr = "stroke-linejoin", value = "round")
         }
+    }
+}
+
+@Composable
+private fun CollapsedSidePanel(onMenuClick: () -> Unit) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(COLLAPSED_PANEL_HEIGHT.px)
+            .padding(leftRight = 24.px)
+            .backgroundColor(Theme.Secondary.rgb),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        FaBars(
+            modifier = Modifier
+                .margin(right = 24.px)
+                .color(Colors.White)
+                .cursor(Cursor.Pointer)
+                .onClick { onMenuClick() },
+            size = IconSize.XL
+        )
+        Image(
+            modifier = Modifier.width(80.px),
+            src = Res.Image.logo,
+            alt = "Logo Image"
+        )
     }
 }
