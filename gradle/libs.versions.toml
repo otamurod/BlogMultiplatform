@@ -1,11 +1,12 @@
 [versions]
-jetbrains-compose = "1.6.2"
-kobweb = "0.18.0"
-kotlin = "1.9.23"
+jetbrains-compose = "1.5.11"
+kobweb = "0.16.0"
+kotlin = "1.9.21"
 kmongo = "5.1.0"
 serialization = "1.6.2"
 mongodb = "1.13.0"
 mongodb-kotlin = "4.11.0"
+kotlin-bootstrap = "0.1.1"
 
 [libraries]
 kobweb-api = { module = "com.varabyte.kobweb:kobweb-api", version.ref = "kobweb" }
@@ -20,6 +21,7 @@ kmongo-database = { module = "org.litote.kmongo:kmongo-coroutine", version.ref =
 kotlinx-serialization = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "serialization" }
 mongodb-sync = { module = "io.realm.kotlin:library-sync", version.ref = "mongodb" }
 mongodb-kotlin-driver = { module = "org.mongodb:mongodb-driver-kotlin-coroutine", version.ref = "mongodb-kotlin" }
+kotlin-bootstrap = { module = "com.github.stevdza-san:KotlinBootstrap", version.ref = "kotlin-bootstrap" }
 
 [plugins]
 jetbrains-compose = { id = "org.jetbrains.compose", version.ref = "jetbrains-compose" }
@@ -30,3 +32,4 @@ kobwebx-markdown = { id = "com.varabyte.kobwebx.markdown", version.ref = "kobweb
 kotlin-multiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
 kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 mongodb-realm = { id = "io.realm.kotlin", version.ref = "mongodb" }
+compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
