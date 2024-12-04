@@ -5,7 +5,9 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import com.varabyte.kobweb.browser.file.loadDataUrlFromDisk
 import com.varabyte.kobweb.compose.css.Cursor
+import com.varabyte.kobweb.compose.css.FontWeight
 import com.varabyte.kobweb.compose.foundation.layout.Arrangement
 import com.varabyte.kobweb.compose.foundation.layout.Box
 import com.varabyte.kobweb.compose.foundation.layout.Column
@@ -20,16 +22,20 @@ import com.varabyte.kobweb.compose.ui.modifiers.borderRadius
 import com.varabyte.kobweb.compose.ui.modifiers.classNames
 import com.varabyte.kobweb.compose.ui.modifiers.color
 import com.varabyte.kobweb.compose.ui.modifiers.cursor
+import com.varabyte.kobweb.compose.ui.modifiers.disabled
+import com.varabyte.kobweb.compose.ui.modifiers.fillMaxHeight
 import com.varabyte.kobweb.compose.ui.modifiers.fillMaxSize
 import com.varabyte.kobweb.compose.ui.modifiers.fillMaxWidth
 import com.varabyte.kobweb.compose.ui.modifiers.fontFamily
 import com.varabyte.kobweb.compose.ui.modifiers.fontSize
+import com.varabyte.kobweb.compose.ui.modifiers.fontWeight
 import com.varabyte.kobweb.compose.ui.modifiers.height
 import com.varabyte.kobweb.compose.ui.modifiers.margin
 import com.varabyte.kobweb.compose.ui.modifiers.maxWidth
 import com.varabyte.kobweb.compose.ui.modifiers.onClick
 import com.varabyte.kobweb.compose.ui.modifiers.outline
 import com.varabyte.kobweb.compose.ui.modifiers.padding
+import com.varabyte.kobweb.compose.ui.thenIf
 import com.varabyte.kobweb.compose.ui.toAttrs
 import com.varabyte.kobweb.core.Page
 import com.varabyte.kobweb.silk.components.forms.Switch
@@ -39,10 +45,12 @@ import com.varabyte.kobweb.silk.components.layout.numColumns
 import com.varabyte.kobweb.silk.components.style.breakpoint.Breakpoint
 import com.varabyte.kobweb.silk.components.text.SpanText
 import com.varabyte.kobweb.silk.theme.breakpoint.rememberBreakpoint
+import kotlinx.browser.document
 import org.jetbrains.compose.web.attributes.InputType
 import org.jetbrains.compose.web.css.LineStyle
 import org.jetbrains.compose.web.css.px
 import org.jetbrains.compose.web.dom.A
+import org.jetbrains.compose.web.dom.Button
 import org.jetbrains.compose.web.dom.Input
 import org.jetbrains.compose.web.dom.Li
 import org.jetbrains.compose.web.dom.Text
@@ -66,6 +74,8 @@ fun CreateScreen() {
     var popularSwitch by remember { mutableStateOf(false) }
     var mainSwitch by remember { mutableStateOf(false) }
     var sponsoredSwitch by remember { mutableStateOf(false) }
+    var isThumbnailInputDisabled by remember { mutableStateOf(true) }
+    var thumbnailFilename by remember { mutableStateOf("") }
     var selectedCategory by remember { mutableStateOf(Category.Programming) }
 
     AdminPageLayout {
@@ -216,6 +226,43 @@ fun CreateScreen() {
                     selectedCategory = selectedCategory,
                     onCategorySelect = { selectedCategory = it }
                 )
+
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .margin(topBottom = 12.px),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Switch(
+                        modifier = Modifier.margin(right = 8.px),
+                        checked = !isThumbnailInputDisabled,
+                        onCheckedChange = {
+                            isThumbnailInputDisabled = !it
+                            if (it) {
+                                thumbnailFilename = ""
+                            }
+                        },
+                        size = SwitchSize.MD
+                    )
+
+                    SpanText(
+                        modifier = Modifier
+                            .fontSize(14.px)
+                            .fontFamily(Constants.FONT_FAMILY)
+                            .color(Theme.HalfBlack.rgb),
+                        text = "Paste an Image URL instead"
+                    )
+                }
+
+                ThumbnailUploader(
+                    thumbnail = thumbnailFilename,
+                    isThumbnailInputDisabled = isThumbnailInputDisabled,
+                    onThumbnailSelect = { filename, file ->
+                        thumbnailFilename = filename
+                        println(filename)
+                        println(file)
+                    }
+                )
             }
         }
     }
@@ -233,6 +280,17 @@ fun CategoryDropDown(
             .fillMaxWidth()
             .height(54.px)
             .backgroundColor(Theme.LightGray.rgb)
+            .borderRadius(r = 4.px)
+            .border(
+                width = 0.px,
+                style = LineStyle.None,
+                color = Colors.Transparent
+            )
+            .outline(
+                width = 0.px,
+                style = LineStyle.None,
+                color = Colors.Transparent
+            )
             .cursor(Cursor.Pointer)
             .attrsModifier {
                 attr("data-bs-toggle", "dropdown")
@@ -281,6 +339,102 @@ fun CategoryDropDown(
                     }
                 }
             }
+        }
+    }
+}
+
+@Composable
+fun ThumbnailUploader(
+    thumbnail: String,
+    isThumbnailInputDisabled: Boolean,
+    onThumbnailSelect: (String, String) -> Unit
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .margin(bottom = 20.px)
+            .height(54.px),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween
+    ) {
+        Input(
+            type = InputType.Text,
+            attrs = Modifier
+                .fillMaxWidth()
+                .height(54.px)
+                .margin(right = 12.px)
+                .padding(leftRight = 20.px)
+                .backgroundColor(Theme.LightGray.rgb)
+                .borderRadius(r = 4.px)
+                .border(
+                    width = 0.px,
+                    style = LineStyle.None,
+                    color = Colors.Transparent
+                )
+                .outline(
+                    width = 0.px,
+                    style = LineStyle.None,
+                    color = Colors.Transparent
+                )
+                .fontFamily(Constants.FONT_FAMILY)
+                .fontSize(16.px)
+                .thenIf(
+                    condition = isThumbnailInputDisabled,
+                    other = Modifier.disabled()
+                )
+                .toAttrs {
+                    attr("placeholder", "Thumbnail")
+                    attr("value", thumbnail)
+                }
+        )
+
+        Button(
+            attrs = Modifier
+                .onClick {
+                    document.loadDataUrlFromDisk(
+                        accept = "image/png, image/jpeg",
+                        onLoad = {
+                            onThumbnailSelect(filename, it)
+                        }
+                    )
+                }
+                .fillMaxHeight()
+                .padding(leftRight = 24.px)
+                .backgroundColor(
+                    if (!isThumbnailInputDisabled) {
+                        Theme.Gray.rgb
+                    } else {
+                        Theme.Primary.rgb
+                    }
+                )
+                .color(
+                    if (!isThumbnailInputDisabled) {
+                        Theme.DarkGray.rgb
+                    } else {
+                        Theme.White.rgb
+                    }
+                )
+                .borderRadius(r = 4.px)
+                .border(
+                    width = 0.px,
+                    style = LineStyle.None,
+                    color = Colors.Transparent
+                )
+                .outline(
+                    width = 0.px,
+                    style = LineStyle.None,
+                    color = Colors.Transparent
+                )
+                .fontFamily(Constants.FONT_FAMILY)
+                .fontSize(14.px)
+                .fontWeight(FontWeight.Medium)
+                .thenIf(
+                    condition = !isThumbnailInputDisabled,
+                    other = Modifier.disabled()
+                )
+                .toAttrs()
+        ) {
+            SpanText(text = "Upload")
         }
     }
 }
