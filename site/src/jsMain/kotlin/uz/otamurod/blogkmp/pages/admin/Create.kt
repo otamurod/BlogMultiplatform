@@ -40,6 +40,7 @@ import com.varabyte.kobweb.compose.ui.toAttrs
 import com.varabyte.kobweb.core.Page
 import com.varabyte.kobweb.silk.components.forms.Switch
 import com.varabyte.kobweb.silk.components.forms.SwitchSize
+import com.varabyte.kobweb.silk.components.graphics.Image
 import com.varabyte.kobweb.silk.components.layout.SimpleGrid
 import com.varabyte.kobweb.silk.components.layout.numColumns
 import com.varabyte.kobweb.silk.components.style.breakpoint.Breakpoint
@@ -57,6 +58,7 @@ import org.jetbrains.compose.web.dom.Text
 import org.jetbrains.compose.web.dom.Ul
 import uz.otamurod.blogkmp.components.AdminPageLayout
 import uz.otamurod.blogkmp.models.Category
+import uz.otamurod.blogkmp.models.EditorControl
 import uz.otamurod.blogkmp.models.Theme
 import uz.otamurod.blogkmp.util.Constants
 import uz.otamurod.blogkmp.util.Constants.SIDE_PANEL_WIDTH
@@ -263,6 +265,8 @@ fun CreateScreen() {
                         println(file)
                     }
                 )
+
+                EditorControls(breakpoint = breakpoint)
             }
         }
     }
@@ -436,5 +440,85 @@ fun ThumbnailUploader(
         ) {
             SpanText(text = "Upload")
         }
+    }
+}
+
+@Composable
+fun EditorControls(breakpoint: Breakpoint) {
+    Box(
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        SimpleGrid(numColumns = numColumns(base = 1, sm = 2)) {
+            Row(
+                modifier = Modifier
+                    .height(54.px)
+                    .backgroundColor(Theme.LightGray.rgb)
+                    .borderRadius(r = 4.px)
+            ) {
+                EditorControl.entries.forEach {
+                    EditorControlView(editorControl = it)
+                }
+            }
+
+            Box(
+                contentAlignment = Alignment.CenterEnd
+            ) {
+                Button(
+                    attrs = Modifier
+                        .height(54.px)
+                        .margin(
+                            topBottom = if (breakpoint < Breakpoint.SM) {
+                                12.px
+                            } else {
+                                0.px
+                            }
+                        )
+                        .padding(leftRight = 24.px)
+                        .backgroundColor(Theme.LightGray.rgb)
+                        .borderRadius(r = 4.px)
+                        .border(
+                            width = 0.px,
+                            style = LineStyle.None,
+                            color = Colors.Transparent
+                        )
+                        .outline(
+                            width = 0.px,
+                            style = LineStyle.None,
+                            color = Colors.Transparent
+                        )
+                        .color(Theme.DarkGray.rgb)
+                        .onClick {
+
+                        }
+                        .toAttrs()
+                ) {
+                    SpanText(
+                        modifier = Modifier
+                            .fontFamily(Constants.FONT_FAMILY)
+                            .fontWeight(FontWeight.Medium)
+                            .fontSize(14.px),
+                        text = "Preview"
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun EditorControlView(editorControl: EditorControl) {
+    Box(
+        modifier = Modifier
+            .fillMaxHeight()
+            .padding(leftRight = 12.px)
+            .borderRadius(r = 4.px)
+            .cursor(Cursor.Pointer)
+            .onClick { },
+        contentAlignment = Alignment.Center
+    ) {
+        Image(
+            src = editorControl.icon,
+            description = "${editorControl.name} Icon"
+        )
     }
 }
