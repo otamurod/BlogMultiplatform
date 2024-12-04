@@ -30,6 +30,7 @@ kotlin {
     sourceSets {
         commonMain.dependencies {
             implementation(compose.runtime)
+            implementation(libs.kotlinx.serialization)
         }
 
         jsMain.dependencies {
@@ -45,6 +46,7 @@ kotlin {
             compileOnly(libs.kobweb.api) // Provided by Kobweb backend at runtime
             implementation(libs.kotlinx.serialization)
             implementation(libs.mongodb.kotlin.driver)
+            implementation(libs.kmongo.database)
         }
     }
 }
