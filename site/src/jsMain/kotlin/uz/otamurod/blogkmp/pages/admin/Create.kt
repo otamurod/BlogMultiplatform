@@ -44,6 +44,7 @@ import com.varabyte.kobweb.silk.components.graphics.Image
 import com.varabyte.kobweb.silk.components.layout.SimpleGrid
 import com.varabyte.kobweb.silk.components.layout.numColumns
 import com.varabyte.kobweb.silk.components.style.breakpoint.Breakpoint
+import com.varabyte.kobweb.silk.components.style.toModifier
 import com.varabyte.kobweb.silk.components.text.SpanText
 import com.varabyte.kobweb.silk.theme.breakpoint.rememberBreakpoint
 import kotlinx.browser.document
@@ -60,6 +61,7 @@ import uz.otamurod.blogkmp.components.AdminPageLayout
 import uz.otamurod.blogkmp.models.Category
 import uz.otamurod.blogkmp.models.EditorControl
 import uz.otamurod.blogkmp.models.Theme
+import uz.otamurod.blogkmp.styles.EditorControlStyle
 import uz.otamurod.blogkmp.util.Constants
 import uz.otamurod.blogkmp.util.Constants.SIDE_PANEL_WIDTH
 import uz.otamurod.blogkmp.util.isUserLoggedIn
@@ -448,7 +450,10 @@ fun EditorControls(breakpoint: Breakpoint) {
     Box(
         modifier = Modifier.fillMaxWidth()
     ) {
-        SimpleGrid(numColumns = numColumns(base = 1, sm = 2)) {
+        SimpleGrid(
+            modifier = Modifier.fillMaxWidth(),
+            numColumns = numColumns(base = 1, sm = 2)
+        ) {
             Row(
                 modifier = Modifier
                     .height(54.px)
@@ -487,6 +492,10 @@ fun EditorControls(breakpoint: Breakpoint) {
                             color = Colors.Transparent
                         )
                         .color(Theme.DarkGray.rgb)
+                        .thenIf(
+                            condition = breakpoint < Breakpoint.SM,
+                            other = Modifier.fillMaxWidth()
+                        )
                         .onClick {
 
                         }
@@ -508,7 +517,7 @@ fun EditorControls(breakpoint: Breakpoint) {
 @Composable
 fun EditorControlView(editorControl: EditorControl) {
     Box(
-        modifier = Modifier
+        modifier = EditorControlStyle.toModifier()
             .fillMaxHeight()
             .padding(leftRight = 12.px)
             .borderRadius(r = 4.px)
