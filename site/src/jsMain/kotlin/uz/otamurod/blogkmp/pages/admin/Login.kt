@@ -16,7 +16,6 @@ import com.varabyte.kobweb.compose.ui.Alignment
 import com.varabyte.kobweb.compose.ui.Modifier
 import com.varabyte.kobweb.compose.ui.graphics.Colors
 import com.varabyte.kobweb.compose.ui.modifiers.backgroundColor
-import com.varabyte.kobweb.compose.ui.modifiers.border
 import com.varabyte.kobweb.compose.ui.modifiers.borderRadius
 import com.varabyte.kobweb.compose.ui.modifiers.color
 import com.varabyte.kobweb.compose.ui.modifiers.cursor
@@ -58,6 +57,7 @@ import uz.otamurod.blogkmp.util.Constants.FONT_FAMILY
 import uz.otamurod.blogkmp.util.Id
 import uz.otamurod.blogkmp.util.Res
 import uz.otamurod.blogkmp.util.checkUserExistence
+import uz.otamurod.blogkmp.util.noBorder
 
 @Page
 @Composable
@@ -139,11 +139,7 @@ fun LoginScreen() {
                     .fontSize(14.px)
                     .fontWeight(FontWeight.Medium)
                     .borderRadius(r = 4.px)
-                    .border(
-                        width = 0.px,
-                        color = Colors.Transparent,
-                        style = LineStyle.None
-                    )
+                    .noBorder()
                     .cursor(Cursor.Pointer)
                     .onClick {
                         scope.launch {
@@ -176,11 +172,6 @@ fun LoginScreen() {
                             }
                         }
                     }
-                    .outline(
-                        width = 0.px,
-                        color = Colors.Transparent,
-                        style = LineStyle.None
-                    )
                     .toAttrs()
             ) {
                 SpanText(text = "Sign In")

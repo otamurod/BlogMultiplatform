@@ -6,6 +6,7 @@ import com.varabyte.kobweb.api.data.add
 import com.varabyte.kobweb.api.init.InitApi
 import com.varabyte.kobweb.api.init.InitApiContext
 import kotlinx.coroutines.flow.firstOrNull
+import uz.otamurod.blogkmp.models.Post
 import uz.otamurod.blogkmp.models.User
 import uz.otamurod.blogkmp.util.Constants.DATABASE_NAME
 
@@ -25,6 +26,7 @@ class MongoDB(val context: InitApiContext) : MongoRepository {
     private val client = MongoClient.create()
     private val database = client.getDatabase(DATABASE_NAME)
     private val userCollection = database.getCollection<User>("user")
+    private val postCollection = database.getCollection<Post>("post")
 
     override suspend fun checkUserExistence(user: User): User? {
         return try {
@@ -51,5 +53,9 @@ class MongoDB(val context: InitApiContext) : MongoRepository {
             context.logger.error(e.message.toString())
             false
         }
+    }
+
+    override suspend fun addPost(post: Post): Boolean {
+        return postCollection.insertOne(post).wasAcknowledged()
     }
 }
