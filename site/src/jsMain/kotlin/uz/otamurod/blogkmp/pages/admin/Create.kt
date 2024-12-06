@@ -4,6 +4,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import com.varabyte.kobweb.browser.file.loadDataUrlFromDisk
 import com.varabyte.kobweb.compose.css.Cursor
@@ -58,6 +59,8 @@ import com.varabyte.kobweb.silk.components.style.toModifier
 import com.varabyte.kobweb.silk.components.text.SpanText
 import com.varabyte.kobweb.silk.theme.breakpoint.rememberBreakpoint
 import kotlinx.browser.document
+import kotlinx.browser.localStorage
+import kotlinx.coroutines.launch
 import org.jetbrains.compose.web.attributes.InputType
 import org.jetbrains.compose.web.css.LineStyle
 import org.jetbrains.compose.web.css.px
@@ -69,16 +72,55 @@ import org.jetbrains.compose.web.dom.Li
 import org.jetbrains.compose.web.dom.Text
 import org.jetbrains.compose.web.dom.TextArea
 import org.jetbrains.compose.web.dom.Ul
+import org.w3c.dom.HTMLInputElement
+import org.w3c.dom.HTMLTextAreaElement
 import uz.otamurod.blogkmp.components.AdminPageLayout
 import uz.otamurod.blogkmp.models.Category
 import uz.otamurod.blogkmp.models.EditorControl
+import uz.otamurod.blogkmp.models.Post
 import uz.otamurod.blogkmp.models.Theme
 import uz.otamurod.blogkmp.styles.EditorControlStyle
 import uz.otamurod.blogkmp.util.Constants.FONT_FAMILY
 import uz.otamurod.blogkmp.util.Constants.SIDE_PANEL_WIDTH
 import uz.otamurod.blogkmp.util.Id
+import uz.otamurod.blogkmp.util.addPost
 import uz.otamurod.blogkmp.util.isUserLoggedIn
 import uz.otamurod.blogkmp.util.noBorder
+
+data class CreatePageUiState(
+    var id: String = "",
+    var title: String = "",
+    var subtitle: String = "",
+    var thumbnailFilename: String = "",
+    var isThumbnailInputDisabled: Boolean = true,
+    var content: String = "",
+    var selectedCategory: Category = Category.Programming,
+    var buttonText: String = "Create",
+    var popularSwitch: Boolean = false,
+    var mainSwitch: Boolean = false,
+    var sponsoredSwitch: Boolean = false,
+    var editorVisibility: Boolean = true,
+    var messagePopup: Boolean = false,
+    var linkPopup: Boolean = false,
+    var imagePopup: Boolean = false
+) {
+    fun reset() = this.copy(
+        id = "",
+        title = "",
+        subtitle = "",
+        thumbnailFilename = "",
+        content = "",
+        selectedCategory = Category.Programming,
+        buttonText = "Create",
+        mainSwitch = false,
+        popularSwitch = false,
+        sponsoredSwitch = false,
+        editorVisibility = true,
+        messagePopup = false,
+        linkPopup = false,
+        imagePopup = false
+    )
+}
 
 @Page
 @Composable
@@ -89,13 +131,8 @@ fun CreatePage() {
 @Composable
 fun CreateScreen() {
     val breakpoint = rememberBreakpoint()
-    var popularSwitch by remember { mutableStateOf(false) }
-    var mainSwitch by remember { mutableStateOf(false) }
-    var sponsoredSwitch by remember { mutableStateOf(false) }
-    var isThumbnailInputDisabled by remember { mutableStateOf(true) }
-    var editorVisibility by remember { mutableStateOf(true) }
-    var thumbnailFilename by remember { mutableStateOf("") }
-    var selectedCategory by remember { mutableStateOf(Category.Programming) }
+    var uiEvent by remember { mutableStateOf(CreatePageUiState()) }
+    val scope = rememberCoroutineScope()
 
     AdminPageLayout {
         Box(
@@ -131,8 +168,8 @@ fun CreateScreen() {
                     ) {
                         Switch(
                             modifier = Modifier.margin(right = 8.px),
-                            checked = popularSwitch,
-                            onCheckedChange = { popularSwitch = it },
+                            checked = uiEvent.popularSwitch,
+                            onCheckedChange = { uiEvent = uiEvent.copy(popularSwitch = it) },
                             size = SwitchSize.LG
                         )
 
@@ -155,8 +192,8 @@ fun CreateScreen() {
                     ) {
                         Switch(
                             modifier = Modifier.margin(right = 8.px),
-                            checked = mainSwitch,
-                            onCheckedChange = { mainSwitch = it },
+                            checked = uiEvent.mainSwitch,
+                            onCheckedChange = { uiEvent = uiEvent.copy(mainSwitch = it) },
                             size = SwitchSize.LG
                         )
 
@@ -174,8 +211,8 @@ fun CreateScreen() {
                     ) {
                         Switch(
                             modifier = Modifier.margin(right = 8.px),
-                            checked = sponsoredSwitch,
-                            onCheckedChange = { sponsoredSwitch = it },
+                            checked = uiEvent.sponsoredSwitch,
+                            onCheckedChange = { uiEvent = uiEvent.copy(sponsoredSwitch = it) },
                             size = SwitchSize.LG
                         )
 
@@ -192,6 +229,7 @@ fun CreateScreen() {
                 Input(
                     type = InputType.Text,
                     attrs = Modifier
+                        .id(Id.titleInput)
                         .fillMaxWidth()
                         .height(54.px)
                         .margin(topBottom = 12.px)
@@ -209,6 +247,7 @@ fun CreateScreen() {
                 Input(
                     type = InputType.Text,
                     attrs = Modifier
+                        .id(Id.subtitleInput)
                         .fillMaxWidth()
                         .height(54.px)
                         .margin(bottom = 12.px)
@@ -224,8 +263,8 @@ fun CreateScreen() {
                 )
 
                 CategoryDropDown(
-                    selectedCategory = selectedCategory,
-                    onCategorySelect = { selectedCategory = it }
+                    selectedCategory = uiEvent.selectedCategory,
+                    onCategorySelect = { uiEvent = uiEvent.copy(selectedCategory = it) }
                 )
 
                 Row(
@@ -236,11 +275,11 @@ fun CreateScreen() {
                 ) {
                     Switch(
                         modifier = Modifier.margin(right = 8.px),
-                        checked = !isThumbnailInputDisabled,
+                        checked = !uiEvent.isThumbnailInputDisabled,
                         onCheckedChange = {
-                            isThumbnailInputDisabled = !it
+                            uiEvent = uiEvent.copy(isThumbnailInputDisabled = !it)
                             if (it) {
-                                thumbnailFilename = ""
+                                uiEvent = uiEvent.copy(thumbnailFilename = "")
                             }
                         },
                         size = SwitchSize.MD
@@ -256,25 +295,69 @@ fun CreateScreen() {
                 }
 
                 ThumbnailUploader(
-                    thumbnail = thumbnailFilename,
-                    isThumbnailInputDisabled = isThumbnailInputDisabled,
-                    onThumbnailSelect = { filename, file ->
-                        thumbnailFilename = filename
-                        println(filename)
-                        println(file)
+                    thumbnail = uiEvent.thumbnailFilename,
+                    isThumbnailInputDisabled = uiEvent.isThumbnailInputDisabled,
+                    onThumbnailSelect = { filename, _ ->
+                        (document.getElementById(Id.thumbnailInput) as HTMLInputElement).value =
+                            filename
+
+                        uiEvent = uiEvent.copy(thumbnailFilename = filename)
                     }
                 )
 
                 EditorControls(
                     breakpoint = breakpoint,
-                    editorVisibility = editorVisibility,
-                    onEditorVisibilityChange = { editorVisibility = !editorVisibility }
+                    editorVisibility = uiEvent.editorVisibility,
+                    onEditorVisibilityChange = {
+                        uiEvent = uiEvent.copy(editorVisibility = !uiEvent.editorVisibility)
+                    }
                 )
 
-                Editor(isVisible = editorVisibility)
+                Editor(isVisible = uiEvent.editorVisibility)
 
                 CreateButton(
-                    onClick = {}
+                    onClick = {
+                        uiEvent =
+                            uiEvent.copy(title = (document.getElementById(Id.titleInput) as HTMLInputElement).value)
+                        uiEvent =
+                            uiEvent.copy(subtitle = (document.getElementById(Id.subtitleInput) as HTMLInputElement).value)
+                        uiEvent =
+                            uiEvent.copy(content = (document.getElementById(Id.editor) as HTMLTextAreaElement).value)
+
+                        if (!uiEvent.isThumbnailInputDisabled) {
+                            uiEvent =
+                                uiEvent.copy(thumbnailFilename = (document.getElementById(Id.thumbnailInput) as HTMLInputElement).value)
+                        }
+
+                        if (
+                            uiEvent.title.isNotEmpty() &&
+                            uiEvent.subtitle.isNotEmpty() &&
+                            uiEvent.thumbnailFilename.isNotEmpty() &&
+                            uiEvent.content.isNotEmpty()
+                        ) {
+                            scope.launch {
+                                val result = addPost(
+                                    post = Post(
+                                        author = localStorage.getItem("username").toString(),
+                                        title = uiEvent.title,
+                                        subtitle = uiEvent.subtitle,
+                                        category = uiEvent.selectedCategory,
+                                        main = uiEvent.mainSwitch,
+                                        popular = uiEvent.popularSwitch,
+                                        sponsored = uiEvent.sponsoredSwitch,
+                                        thumbnail = uiEvent.thumbnailFilename,
+                                        content = uiEvent.content
+                                    )
+                                )
+
+                                if (result) {
+                                    println("Successful!")
+                                }
+                            }
+                        } else {
+                            println("Please fill in all fields")
+                        }
+                    }
                 )
             }
         }
@@ -364,6 +447,7 @@ fun ThumbnailUploader(
         Input(
             type = InputType.Text,
             attrs = Modifier
+                .id(Id.thumbnailInput)
                 .fillMaxWidth()
                 .height(54.px)
                 .margin(right = 12.px)
