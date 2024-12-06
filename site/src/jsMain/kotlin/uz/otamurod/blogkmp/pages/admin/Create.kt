@@ -60,6 +60,7 @@ import com.varabyte.kobweb.silk.components.text.SpanText
 import com.varabyte.kobweb.silk.theme.breakpoint.rememberBreakpoint
 import kotlinx.browser.document
 import kotlinx.browser.localStorage
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.web.attributes.InputType
 import org.jetbrains.compose.web.css.LineStyle
@@ -75,6 +76,7 @@ import org.jetbrains.compose.web.dom.Ul
 import org.w3c.dom.HTMLInputElement
 import org.w3c.dom.HTMLTextAreaElement
 import uz.otamurod.blogkmp.components.AdminPageLayout
+import uz.otamurod.blogkmp.components.MessagePopUp
 import uz.otamurod.blogkmp.models.Category
 import uz.otamurod.blogkmp.models.EditorControl
 import uz.otamurod.blogkmp.models.Post
@@ -131,7 +133,7 @@ fun CreatePage() {
 @Composable
 fun CreateScreen() {
     val breakpoint = rememberBreakpoint()
-    var uiEvent by remember { mutableStateOf(CreatePageUiState()) }
+    var uiState by remember { mutableStateOf(CreatePageUiState()) }
     val scope = rememberCoroutineScope()
 
     AdminPageLayout {
@@ -168,8 +170,8 @@ fun CreateScreen() {
                     ) {
                         Switch(
                             modifier = Modifier.margin(right = 8.px),
-                            checked = uiEvent.popularSwitch,
-                            onCheckedChange = { uiEvent = uiEvent.copy(popularSwitch = it) },
+                            checked = uiState.popularSwitch,
+                            onCheckedChange = { uiState = uiState.copy(popularSwitch = it) },
                             size = SwitchSize.LG
                         )
 
@@ -192,8 +194,8 @@ fun CreateScreen() {
                     ) {
                         Switch(
                             modifier = Modifier.margin(right = 8.px),
-                            checked = uiEvent.mainSwitch,
-                            onCheckedChange = { uiEvent = uiEvent.copy(mainSwitch = it) },
+                            checked = uiState.mainSwitch,
+                            onCheckedChange = { uiState = uiState.copy(mainSwitch = it) },
                             size = SwitchSize.LG
                         )
 
@@ -211,8 +213,8 @@ fun CreateScreen() {
                     ) {
                         Switch(
                             modifier = Modifier.margin(right = 8.px),
-                            checked = uiEvent.sponsoredSwitch,
-                            onCheckedChange = { uiEvent = uiEvent.copy(sponsoredSwitch = it) },
+                            checked = uiState.sponsoredSwitch,
+                            onCheckedChange = { uiState = uiState.copy(sponsoredSwitch = it) },
                             size = SwitchSize.LG
                         )
 
@@ -263,8 +265,8 @@ fun CreateScreen() {
                 )
 
                 CategoryDropDown(
-                    selectedCategory = uiEvent.selectedCategory,
-                    onCategorySelect = { uiEvent = uiEvent.copy(selectedCategory = it) }
+                    selectedCategory = uiState.selectedCategory,
+                    onCategorySelect = { uiState = uiState.copy(selectedCategory = it) }
                 )
 
                 Row(
@@ -275,11 +277,11 @@ fun CreateScreen() {
                 ) {
                     Switch(
                         modifier = Modifier.margin(right = 8.px),
-                        checked = !uiEvent.isThumbnailInputDisabled,
+                        checked = !uiState.isThumbnailInputDisabled,
                         onCheckedChange = {
-                            uiEvent = uiEvent.copy(isThumbnailInputDisabled = !it)
+                            uiState = uiState.copy(isThumbnailInputDisabled = !it)
                             if (it) {
-                                uiEvent = uiEvent.copy(thumbnailFilename = "")
+                                uiState = uiState.copy(thumbnailFilename = "")
                             }
                         },
                         size = SwitchSize.MD
@@ -295,58 +297,58 @@ fun CreateScreen() {
                 }
 
                 ThumbnailUploader(
-                    thumbnail = uiEvent.thumbnailFilename,
-                    isThumbnailInputDisabled = uiEvent.isThumbnailInputDisabled,
+                    thumbnail = uiState.thumbnailFilename,
+                    isThumbnailInputDisabled = uiState.isThumbnailInputDisabled,
                     onThumbnailSelect = { filename, _ ->
                         (document.getElementById(Id.thumbnailInput) as HTMLInputElement).value =
                             filename
 
-                        uiEvent = uiEvent.copy(thumbnailFilename = filename)
+                        uiState = uiState.copy(thumbnailFilename = filename)
                     }
                 )
 
                 EditorControls(
                     breakpoint = breakpoint,
-                    editorVisibility = uiEvent.editorVisibility,
+                    editorVisibility = uiState.editorVisibility,
                     onEditorVisibilityChange = {
-                        uiEvent = uiEvent.copy(editorVisibility = !uiEvent.editorVisibility)
+                        uiState = uiState.copy(editorVisibility = !uiState.editorVisibility)
                     }
                 )
 
-                Editor(isVisible = uiEvent.editorVisibility)
+                Editor(isVisible = uiState.editorVisibility)
 
                 CreateButton(
                     onClick = {
-                        uiEvent =
-                            uiEvent.copy(title = (document.getElementById(Id.titleInput) as HTMLInputElement).value)
-                        uiEvent =
-                            uiEvent.copy(subtitle = (document.getElementById(Id.subtitleInput) as HTMLInputElement).value)
-                        uiEvent =
-                            uiEvent.copy(content = (document.getElementById(Id.editor) as HTMLTextAreaElement).value)
+                        uiState =
+                            uiState.copy(title = (document.getElementById(Id.titleInput) as HTMLInputElement).value)
+                        uiState =
+                            uiState.copy(subtitle = (document.getElementById(Id.subtitleInput) as HTMLInputElement).value)
+                        uiState =
+                            uiState.copy(content = (document.getElementById(Id.editor) as HTMLTextAreaElement).value)
 
-                        if (!uiEvent.isThumbnailInputDisabled) {
-                            uiEvent =
-                                uiEvent.copy(thumbnailFilename = (document.getElementById(Id.thumbnailInput) as HTMLInputElement).value)
+                        if (!uiState.isThumbnailInputDisabled) {
+                            uiState =
+                                uiState.copy(thumbnailFilename = (document.getElementById(Id.thumbnailInput) as HTMLInputElement).value)
                         }
 
                         if (
-                            uiEvent.title.isNotEmpty() &&
-                            uiEvent.subtitle.isNotEmpty() &&
-                            uiEvent.thumbnailFilename.isNotEmpty() &&
-                            uiEvent.content.isNotEmpty()
+                            uiState.title.isNotEmpty() &&
+                            uiState.subtitle.isNotEmpty() &&
+                            uiState.thumbnailFilename.isNotEmpty() &&
+                            uiState.content.isNotEmpty()
                         ) {
                             scope.launch {
                                 val result = addPost(
                                     post = Post(
                                         author = localStorage.getItem("username").toString(),
-                                        title = uiEvent.title,
-                                        subtitle = uiEvent.subtitle,
-                                        category = uiEvent.selectedCategory,
-                                        main = uiEvent.mainSwitch,
-                                        popular = uiEvent.popularSwitch,
-                                        sponsored = uiEvent.sponsoredSwitch,
-                                        thumbnail = uiEvent.thumbnailFilename,
-                                        content = uiEvent.content
+                                        title = uiState.title,
+                                        subtitle = uiState.subtitle,
+                                        category = uiState.selectedCategory,
+                                        main = uiState.mainSwitch,
+                                        popular = uiState.popularSwitch,
+                                        sponsored = uiState.sponsoredSwitch,
+                                        thumbnail = uiState.thumbnailFilename,
+                                        content = uiState.content
                                     )
                                 )
 
@@ -355,12 +357,25 @@ fun CreateScreen() {
                                 }
                             }
                         } else {
-                            println("Please fill in all fields")
+                            scope.launch {
+                                uiState = uiState.copy(messagePopup = true)
+                                delay(2000)
+                                uiState = uiState.copy(messagePopup = false)
+                            }
                         }
                     }
                 )
             }
         }
+    }
+
+    if (uiState.messagePopup) {
+        MessagePopUp(
+            message = "Please fill in all fields",
+            onDismiss = {
+                uiState = uiState.copy(messagePopup = false)
+            }
+        )
     }
 }
 
