@@ -49,6 +49,7 @@ import com.varabyte.kobweb.compose.ui.modifiers.visibility
 import com.varabyte.kobweb.compose.ui.thenIf
 import com.varabyte.kobweb.compose.ui.toAttrs
 import com.varabyte.kobweb.core.Page
+import com.varabyte.kobweb.core.rememberPageContext
 import com.varabyte.kobweb.silk.components.forms.Switch
 import com.varabyte.kobweb.silk.components.forms.SwitchSize
 import com.varabyte.kobweb.silk.components.graphics.Image
@@ -81,6 +82,7 @@ import uz.otamurod.blogkmp.models.Category
 import uz.otamurod.blogkmp.models.EditorControl
 import uz.otamurod.blogkmp.models.Post
 import uz.otamurod.blogkmp.models.Theme
+import uz.otamurod.blogkmp.navigation.Screen
 import uz.otamurod.blogkmp.styles.EditorControlStyle
 import uz.otamurod.blogkmp.util.Constants.FONT_FAMILY
 import uz.otamurod.blogkmp.util.Constants.SIDE_PANEL_WIDTH
@@ -132,6 +134,7 @@ fun CreatePage() {
 
 @Composable
 fun CreateScreen() {
+    val context = rememberPageContext()
     val breakpoint = rememberBreakpoint()
     var uiState by remember { mutableStateOf(CreatePageUiState()) }
     val scope = rememberCoroutineScope()
@@ -353,7 +356,7 @@ fun CreateScreen() {
                                 )
 
                                 if (result) {
-                                    println("Successful!")
+                                    context.router.navigateTo(Screen.AdminSuccess.route)
                                 }
                             }
                         } else {
